@@ -1,5 +1,5 @@
 # knowledge_graph_term
-Term project and related assignments from group - Consumer Discretionary
+Term project and related assignments from group - Consumer Discretionary Sector
 # Consumer Discretionary Sector Knowledge Graph
 By Greg Roberts and Flavio Mota
 
