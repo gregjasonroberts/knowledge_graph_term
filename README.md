@@ -1,58 +1,53 @@
 # knowledge_graph_term
 Term project and related assignments from group - Consumer Discretionary
+# Consumer Discretionary Sector Knowledge Graph
+By Greg Roberts and Flavio Mota
 
-#  Knowledge Graphs and NLP: Key Concepts and Applications
+## Overview of Project
+This repository hosts a research and development effort to build a knowledge graph for the consumer discretionary sector. The graph integrates real‑time transaction records from a payments network, macroeconomic indicators, firm fundamentals, and qualitative context from regulatory filings and industry news. Nodes represent entities such as companies, product categories, consumer segments, economic indicators, transaction records, and data sources. Edges capture relationships extracted via named entity recognition and relationship extraction, enabling multi‑hop exploration of how spending patterns, macro signals, and firm attributes interact. Automated pipelines ingest data from indices, government surveys, financial APIs, web sources, and focused crawlers, then normalize and upsert this information into an EdgeDB schema designed for strong typing and graph semantics. A prototype dashboard and natural‑language interface demonstrate how users can pose complex queries to uncover competitive intelligence in seconds.
 
-This repository captures summaries and key takeaways from selected chapters of two foundational texts in the fields of **knowledge graph** and **natural language processing (NLP)**. The purpose is to provide a reference base for building smarter, grounded, and more reliable AI systems using structured knowledge and large language models (LLMs).
+## Scope of Research Paper
+The accompanying research paper is structured as a formal report with the following sections:
 
----
+* **Abstract**  
+  A concise summary of the topic, objectives, methodology, and work completed to date.  
 
-##  Resources
+* **Introduction**  
+  Motivation for the study, target user groups (equity analysts, portfolio managers, marketing strategists, data science teams), and intended applications such as targeted stock recommendations and precision marketing insights.  
 
-- **_Knowledge Graphs: Fundamentals, Techniques, and Applications_**  
-  Authors: Mayank Kejriwal, Craig Knoblock, Pedro Szekely (MIT Press)
+* **Literature Review**  
+  Survey of prior work in knowledge graph construction in domains like biomedical research, corporate network analysis, and RAG augmented retrieval systems. Discussion of best practices in ontology design and graph database implementation.  
 
-- **_Natural Language Processing in Action_**  
-  Authors: Hobson Lane, Cole Howard, Hannes Hapke (Manning)
+* **Methods**  
+  Detailed description of how the five core research questions are addressed:  
+  * Topic selection rationale based on economic cycle sensitivity and access to transaction data  
+  * EdgeDB schema design guided by RDF Schema principles with defined node and edge types  
+  * Automated ingestion pipelines for indices, surveys, APIs, web sources, and filings  
+  * Identification of sample user queries and personas  
+  * Application stack architecture including interactive graph exploration, RAG‑powered chatbot, and recommendation engine  
 
----
+* **Results**  
+  Findings from initial data ingestion and schema trials, utility of each data source in populating the graph, emergence of new node types through cluster analysis, and early visualizations demonstrating multi‑hop query performance.  
 
-##  Part 1: Knowledge Graphs – Summary of Key Concepts  
- _Based on Chapters 1–2 from_ **Knowledge Graphs**
+* **Conclusions**  
+  Reflection on how the collected data and graph schema address the management problem of competitive intelligence in the consumer discretionary sector, considerations for entity resolution and data governance, and next steps to scale and maintain the knowledge base.
 
-This section introduces the foundations of knowledge graphs (KGs), focusing on how entities and relationships are modeled using RDF triples and ontologies.
+## Repository Structure
+* `schema/`  
+  EdgeDB schema definitions  
+* `pipelines/`  
+  Scrapy spiders and ETL scripts for data ingestion  
+* `docs/`  
+  Research paper draft and supplementary materials  
+* `dashboard/`  
+  Prototype graph exploration and query interface  
 
----
-
-##  Part 2: Domain Discovery & Web Information Extraction  
- _Based on Chapters 3 and 5 from_ **Knowledge Graphs**
-
-These chapters focus on how to acquire domain-specific web content and extract structured facts using wrapper-based and learning-based approaches.
- 
----
-
-##  Part 3: Named Entity Recognition (NER)  
- _Based on Chapter 4 from_ **Knowledge Graphs**
-
-NER is a foundational step in information extraction, identifying class instances in text using ontology-guided or open approaches.
- 
----
-
-##  Chapter 10: LLMs, Errors & Retrieval-Augmented Generation  
- _From_ **Natural Language Processing in Action**
-
-This chapter discusses the power and limitations of LLMs and how to ground their outputs in facts using vector-based retrieval and fine-tuning.
- 
----
-
-##  Chapter 11: Information Extraction and Knowledge Graphs  
- _From_ **Natural Language Processing in Action**
-
-This chapter walks through how to extract facts from text and build a knowledge graph for reasoning and grounding LLMs. It emphasizes that while language models sound fluent, they lack true understanding, something that symbolic, structured knowledge systems can support.
-
-
-
-
----
- 
-
+## Data Sources
+* Fiserv Small Business Index  
+* BEA consumer expenditure surveys  
+* U.S. Census Bureau retail sales reports  
+* Federal Reserve Economic Data APIs  
+* Wikipedia sector constituent lists  
+* Yahoo Finance real‑time price and fundamental data  
+* SEC EDGAR filings  
+* Industry news via focused crawler
