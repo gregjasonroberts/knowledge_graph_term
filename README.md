@@ -101,7 +101,7 @@ This repository hosts an extensible, data‑rich knowledge graph for the consume
 
    Create nodes, relationships, and attach embeddings in Neo4j.
 
-4. **RAG Service**
+4. **RAG Service** - Not yet tested
 
    ```bash
    uvicorn app.main:app --reload
