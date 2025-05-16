@@ -1,53 +1,143 @@
-# knowledge_graph_term
-Term project and related assignments from group - Consumer Discretionary Sector
-# Consumer Discretionary Sector Knowledge Graph
-By Greg Roberts and Flavio Mota
+# Consumer Discretionary Knowledge Graph
 
-## Overview of Project
-This repository hosts a research and development effort to build a knowledge graph for the consumer discretionary sector. The graph integrates real‑time transaction records from a payments network, macroeconomic indicators, firm fundamentals, and qualitative context from regulatory filings and industry news. Nodes represent entities such as companies, product categories, consumer segments, economic indicators, transaction records, and data sources. Edges capture relationships extracted via named entity recognition and relationship extraction, enabling multi‑hop exploration of how spending patterns, macro signals, and firm attributes interact. Automated pipelines ingest data from indices, government surveys, financial APIs, web sources, and focused crawlers, then normalize and upsert this information into an EdgeDB schema designed for strong typing and graph semantics. A prototype dashboard and natural‑language interface demonstrate how users can pose complex queries to uncover competitive intelligence in seconds.
+## Overview
 
-## Scope of Research Paper
-The accompanying research paper is structured as a formal report with the following sections:
+This repository hosts an extensible, data‑rich knowledge graph for the consumer discretionary sector, built in Neo4j. It combines a manually curated list of **10** core companies and a structured product taxonomy with programmatic ingestion of market indices, financial metrics, macroeconomic series, and corporate documents. The graph enables competitive‑intelligence queries and supports retrieval‑augmented generation (RAG) for natural‑language analytics.
 
-* **Abstract**  
-  A concise summary of the topic, objectives, methodology, and work completed to date.  
+## Objectives
 
-* **Introduction**  
-  Motivation for the study, target user groups (equity analysts, portfolio managers, marketing strategists, data science teams), and intended applications such as targeted stock recommendations and precision marketing insights.  
+* Integrate and normalize heterogeneous data sources for publicly traded consumer discretionary companies.
+* Maintain raw and processed data for auditability and reusability under version control.
+* Centralize entities, relationships, and embeddings in Neo4j for graph queries and analytics.
+* Provide a RAG interface combining graph traversals and vector similarity search to answer business questions.
 
-* **Literature Review**  
-  Survey of prior work in knowledge graph construction in domains like biomedical research, corporate network analysis, and RAG augmented retrieval systems. Discussion of best practices in ontology design and graph database implementation.  
+## Architecture
 
-* **Methods**  
-  Detailed description of how the five core research questions are addressed:  
-  * Topic selection rationale based on economic cycle sensitivity and access to transaction data  
-  * EdgeDB schema design guided by RDF Schema principles with defined node and edge types  
-  * Automated ingestion pipelines for indices, surveys, APIs, web sources, and filings  
-  * Identification of sample user queries and personas  
-  * Application stack architecture including interactive graph exploration, RAG‑powered chatbot, and recommendation engine  
+1. **Data Ingestion**
 
-* **Results**  
-  Findings from initial data ingestion and schema trials, utility of each data source in populating the graph, emergence of new node types through cluster analysis, and early visualizations demonstrating multi‑hop query performance.  
+   * Python scripts and Scrapy spiders fetch data from APIs, web pages, and file drops on a regular schedule.
 
-* **Conclusions**  
-  Reflection on how the collected data and graph schema address the management problem of competitive intelligence in the consumer discretionary sector, considerations for entity resolution and data governance, and next steps to scale and maintain the knowledge base.
+2. **Raw Data Storage**
 
-## Repository Structure
-* `schema/`  
-  EdgeDB schema definitions  
-* `pipelines/`  
-  Scrapy spiders and ETL scripts for data ingestion  
-* `docs/`  
-  Research paper draft and supplementary materials  
-* `dashboard/`  
-  Prototype graph exploration and query interface  
+   * Persist unmodified JSON, CSV, and HTML outputs in `/data/raw` for full audit trails and reprocessing.
+
+3. **Transformation & Enrichment**
+
+   * Pandas‑based ETL cleans, normalizes, and enriches records, writing outputs to `/data/processed`.
+
+4. **Graph Database Layer**
+
+   * **Neo4j** manages entities, relationships, and vector indexes.
+   * **Embeddings**: Document and entity vectors stored as node properties; Neo4j Graph Data Science library enables k‑NN and similarity queries.
+
+5. **Embedding Generation**
+
+   * Batch Python jobs call the OpenAI API to compute embeddings, then attach vectors to nodes in Neo4j.
+
+6. **RAG Pipeline**
+
+   * LangChain chains combine Cypher queries and embedding‑based similarity search to serve natural‑language answers via FastAPI.
 
 ## Data Sources
-* Fiserv Small Business Index  
-* BEA consumer expenditure surveys  
-* U.S. Census Bureau retail sales reports  
-* Federal Reserve Economic Data APIs  
-* Wikipedia sector constituent lists  
-* Yahoo Finance real‑time price and fundamental data  
-* SEC EDGAR filings  
-* Industry news via focused crawler
+
+* **Manual Curation**: CSV of 10 consumer‑discretionary companies (symbol, name, sector); JSON taxonomies for products and subcategories.
+
+* **APIs**:
+
+  * **FRED**: U.S. consumer‑spending series (Retail Trade, Food Services, etc.).
+  * **Fiserv FSBI**: Monthly small‑business index values for consumer discretionary.
+  * **Yahoo Finance**: Financial metrics (revenue, market capitalization, P/E ratio, EBITDA).
+
+* **Web Scraping**:
+
+  * **Wikipedia**: Company profiles (CEO, headquarters, founding date, sector classification).
+  * **EDGAR Filings**: 10‑K and 8‑K metadata (type, date, URL) parsed via BeautifulSoup.
+
+## Graph Schema
+
+### Node Labels & Key Properties
+
+* **Company**: `symbol`, `name`, `sector`, `CEO`, `headquarters`
+* **Industry**: `name`
+* **Product**: `category`, `subcategory`
+* **Index**: `name`
+* **IndexPoint**: `date`, `value`
+* **SpendingSeries**: `seriesName`
+* **SpendingPoint**: `date`, `value`
+* **Document**: `type`, `date`, `url`
+
+### Relationships
+
+* `(c:Company)-[:PART_OF_INDUSTRY]->(i:Industry)`
+* `(c:Company)-[:OFFERS]->(p:Product)`
+* `(idx:Index)-[:HAS_POINT]->(pt:IndexPoint)`
+* `(ss:SpendingSeries)-[:MEASURED_AT]->(sp:SpendingPoint)`
+* `(c:Company)-[:HAS_METRIC]->(m:FinancialMetric)`
+* `(d:Document)-[:RELATED_TO]->(c:Company)`
+
+## Pipeline Components
+
+1. **Ingest**
+
+   ```bash
+   python scripts/ingest.py
+   ```
+
+   Fetch and store raw data under `/data/raw`.
+
+2. **Transform**
+
+   ```bash
+   python scripts/transform.py
+   ```
+
+   Clean, normalize, and output processed files to `/data/processed`.
+
+3. **Load Neo4j**
+
+   ```bash
+   python scripts/load_neo4j.py
+   ```
+
+   Create nodes, relationships, and attach embeddings in Neo4j.
+
+4. **RAG Service**
+
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+   Serve a FastAPI that merges graph queries with vector search for natural‑language responses.
+
+## Getting Started
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://gitlab.com/<your-namespace>/consumer-discretionary-kg.git
+   cd consumer-discretionary-kg
+   ```
+
+2. Configure environment:
+
+   ```bash
+   cp env.example .env
+   ```
+
+   Set `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, and `OPENAI_API_KEY`.
+
+3. Install dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Run the full pipeline following **Pipeline Components**.
+
+## Contributing
+
+Contributions are welcome! Please fork, create a feature branch, and submit a merge request. Ensure tests pass and documentation stays current.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
