@@ -134,10 +134,4 @@ This repository hosts an extensible, data‑rich knowledge graph for the consume
 
 4. Run the full pipeline following **Pipeline Components**.
 
-## Contributing
 
-Contributions are welcome! Please fork, create a feature branch, and submit a merge request. Ensure tests pass and documentation stays current.
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
