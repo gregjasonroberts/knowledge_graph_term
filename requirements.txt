@@ -1,0 +1,4 @@
+neo4j
+beautifulsoup4
+requests
+nltk
