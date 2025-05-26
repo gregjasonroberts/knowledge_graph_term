@@ -13,7 +13,7 @@ Our knowledge base ingests **four distinct data streams** and unifies them in Ne
    * Scrape each company’s Wikipedia page with BeautifulSoup, extracting infobox fields (e.g., name, CEO, headquarters, industry) and the first valid paragraph of body text.
    * Parse and normalize into `Document` nodes using `DocumentParser`.
 
-3. **Market Indices & Financial Metrics**
+2. **Market Indices & Financial Metrics**
 
    * Fetch historical index values (e.g., S\&P 500, Dow Jones Consumer Discretionary) and key financial ratios (revenue, market cap, P/E, EBITDA) via the Yahoo Finance API and official index providers.
    * Store in `Index` nodes with related `IndexPoint` children and link metrics (`FinancialMetric`) to `Company` nodes.
@@ -76,14 +76,14 @@ This project breaks down into discrete scripts located under `scripts/` that can
 
 | Script                        | Description                                                                                          |
 |-------------------------------|------------------------------------------------------------------------------------------------------|
-| `scripts/parsers.py`          | Normalize raw scraped sources (Wikipedia, EDGAR filings) into intermediate JSON for downstream use. |
+| `scripts/parsers.py`          | Normalize raw scraped sources (Wikipedia or EDGAR filings) into intermediate JSON for downstream use. |
 | `scripts/fred_loader.py`      | Ingest FRED economic series (PCE, CPI, LEI) into the processed dataset.                             |
 | `scripts/fsbi_loader.py`      | Load Fiserv FSBI consumer-discretionary small-business index values.                                 |
-| `scripts/stock_loader.py`     | Fetch company financial metrics (revenue, market cap, P/E, EBITDA) via Yahoo Finance.               |
-| `scripts/embed_documents.py`  | Compute OpenAI embeddings for documents and entities, attaching vectors as node properties in Neo4j.|
+| `scripts/stock_loader.py`     | Fetch company financial metrics (closing price, revenue, market cap, P/E, EBITDA) via Yahoo Finance.               |
+| `scripts/embed_documents.py`  | Generate vector embeddings for Document and Entity nodes using a transformer model and store them as properties on those nodes in Neo4j.|
 | `scripts/neo4j_db.py`         | Provide Neo4j connection utilities and helper functions for node/relationship creation.              |
-| `scripts/pipelines.py`        | Define and sequence the ETL stages (ingest → transform → load → embed) as a dependency graph.        |
-| `scripts/run_pipeline.py`     | CLI entrypoint that executes the full ETL → Neo4j load → embedding pipeline in one command.         |
+| `scripts/pipelines.py`        | Define and sequence the ETL stages (ingest -> transform -> load -> embed) as a dependency graph.        |
+| `scripts/run_pipeline.py`     | CLI entrypoint that executes the full ETL -> Neo4j load -> embedding pipeline in one command.         |
 
 
 
