@@ -13,20 +13,20 @@ Our knowledge base ingests **four distinct data streams** and unifies them in Ne
    * Scrape each company’s Wikipedia page with BeautifulSoup, extracting infobox fields (e.g., name, CEO, headquarters, industry) and the first valid paragraph of body text.
    * Parse and normalize into `Document` nodes using `DocumentParser`.
 
-2. **Corporate Filings**: SEC EDGAR 10‑K / 8‑K
-
-   * Retrieve the three most recent annual and quarterly filings per ticker via the SEC EDGAR API.
-   * Parse XBRL metadata and HTML sections, storing metadata (`type`, `date`, `url`) and linking each `Document` node to its `Company` and, optionally, `Industry`.
-
 3. **Market Indices & Financial Metrics**
 
    * Fetch historical index values (e.g., S\&P 500, Dow Jones Consumer Discretionary) and key financial ratios (revenue, market cap, P/E, EBITDA) via the Yahoo Finance API and official index providers.
    * Store in `Index` nodes with related `IndexPoint` children and link metrics (`FinancialMetric`) to `Company` nodes.
 
-4. **Macroeconomic Time Series**
+3. **Macroeconomic Time Series**
 
    * Ingest U.S. time series from FRED: Personal Consumption Expenditures (PCE), Consumer Price Index (CPI), and Leading Economic Indicators (LEI).
    * Persist under `SpendingSeries` and `SpendingPoint` nodes.
+
+4. **Corporate Filings**: SEC EDGAR 10‑K / 8‑K  (Future data source)
+
+   * Retrieve the three most recent annual and quarterly filings per ticker via the SEC EDGAR API.
+   * Parse XBRL metadata and HTML sections, storing metadata (`type`, `date`, `url`) and linking each `Document` node to its `Company` and, optionally, `Industry`.
 
 ## Data Sources
 
