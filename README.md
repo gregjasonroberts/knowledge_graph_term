@@ -90,7 +90,7 @@ This project breaks down into discrete scripts located under `scripts/` that can
 ## Configuration
 
 * Other requirements and API keys:
-- openai for future use, currently applying a free transformer and API wrapper from Huggingface: SentenceTransfomer with `all-mpnet-base-v2`
+  * openai for future use, currently applying a free transformer and API wrapper from Huggingface: SentenceTransfomer with `all-mpnet-base-v2`
   ```
   FRED_API_KEY=<your_fred_key>
   EDGAR_API_KEY=<your_edgar_key>
