@@ -4,134 +4,100 @@
 
 This repository hosts an extensible, data‑rich knowledge graph for the consumer discretionary sector, built in Neo4j. It combines a manually curated list of **10** core companies and a structured product taxonomy with programmatic ingestion of market indices, financial metrics, macroeconomic series, and corporate documents. The graph enables competitive‑intelligence queries and supports retrieval‑augmented generation (RAG) for natural‑language analytics.
 
-## Objectives
+## Data Ingestion & Graph Construction
 
-* Integrate and normalize heterogeneous data sources for publicly traded consumer discretionary companies.
-* Maintain raw and processed data for auditability and reusability under version control.
-* Centralize entities, relationships, and embeddings in Neo4j for graph queries and analytics.
-* Provide a RAG interface combining graph traversals and vector similarity search to answer business questions.
+Our knowledge base ingests **four distinct data streams** and unifies them in Neo4j. A custom `DocumentParser` class normalizes scraped and parsed sources into Python dictionaries, and relationships are anchored to company, industry, and macro nodes.
 
-## Architecture
+1. **Textual Documents**: Wikipedia Infoboxes & Articles
 
-1. **Data Ingestion**
+   * Scrape each company’s Wikipedia page with BeautifulSoup, extracting infobox fields (e.g., name, CEO, headquarters, industry) and the first valid paragraph of body text.
+   * Parse and normalize into `Document` nodes using `DocumentParser`.
 
-   * Python scripts and Scrapy spiders fetch data from APIs, web pages, and file drops on a regular schedule.
+2. **Corporate Filings**: SEC EDGAR 10‑K / 8‑K
 
-2. **Raw Data Storage**
+   * Retrieve the three most recent annual and quarterly filings per ticker via the SEC EDGAR API.
+   * Parse XBRL metadata and HTML sections, storing metadata (`type`, `date`, `url`) and linking each `Document` node to its `Company` and, optionally, `Industry`.
 
-   * Persist unmodified JSON, CSV, and HTML outputs in `/data/raw` for full audit trails and reprocessing.
+3. **Market Indices & Financial Metrics**
 
-3. **Transformation & Enrichment**
+   * Fetch historical index values (e.g., S\&P 500, Dow Jones Consumer Discretionary) and key financial ratios (revenue, market cap, P/E, EBITDA) via the Yahoo Finance API and official index providers.
+   * Store in `Index` nodes with related `IndexPoint` children and link metrics (`FinancialMetric`) to `Company` nodes.
 
-   * Pandas‑based ETL cleans, normalizes, and enriches records, writing outputs to `/data/processed`.
+4. **Macroeconomic Time Series**
 
-4. **Graph Database Layer**
-
-   * **Neo4j** manages entities, relationships, and vector indexes.
-   * **Embeddings**: Document and entity vectors stored as node properties; Neo4j Graph Data Science library enables k‑NN and similarity queries.
-
-5. **Embedding Generation**
-
-   * Batch Python jobs call the OpenAI API to compute embeddings, then attach vectors to nodes in Neo4j.
-
-6. **RAG Pipeline**
-
-   * LangChain chains combine Cypher queries and embedding‑based similarity search to serve natural‑language answers via FastAPI.
+   * Ingest U.S. time series from FRED: Personal Consumption Expenditures (PCE), Consumer Price Index (CPI), and Leading Economic Indicators (LEI).
+   * Persist under `SpendingSeries` and `SpendingPoint` nodes.
 
 ## Data Sources
 
-* **Manual Curation**: CSV of 10 consumer‑discretionary companies (symbol, name, sector); JSON taxonomies for products and subcategories.
+* **Manual Curation**
+  CSV of 10 consumer‑discretionary companies (symbol, name, sector) and JSON taxonomies for products and subcategories.
 
-* **APIs**:
+* **APIs**
 
-  * **FRED**: U.S. consumer‑spending series (Retail Trade, Food Services, etc.).
-  * **Fiserv FSBI**: Monthly small‑business index values for consumer discretionary.
-  * **Yahoo Finance**: Financial metrics (revenue, market capitalization, P/E ratio, EBITDA).
+  * **FRED**: PCE, CPI, LEI series.
+  * **Fiserv FSBI**: Monthly small‑business index for consumer discretionary.
+  * **Yahoo Finance**: Company financial metrics via `yfinance`.
 
-* **Web Scraping**:
+* **Web Scraping**
 
-  * **Wikipedia**: Company profiles (CEO, headquarters, founding date, sector classification).
-  * **EDGAR Filings**: 10‑K and 8‑K metadata (type, date, URL) parsed via BeautifulSoup.
+  * **Wikipedia**: Infobox data and article intros via BeautifulSoup & `DocumentParser`.
+  * **SEC EDGAR**: 10‑K / 8‑K filings parsed through XBRL and HTML parsing.
 
 ## Graph Schema
 
-### Node Labels & Key Properties
+### Node Labels & Properties
 
 * **Company**: `symbol`, `name`, `sector`, `CEO`, `headquarters`
 * **Industry**: `name`
 * **Product**: `category`, `subcategory`
-* **Index**: `name`
-* **IndexPoint**: `date`, `value`
-* **SpendingSeries**: `seriesName`
-* **SpendingPoint**: `date`, `value`
-* **Document**: `type`, `date`, `url`
+* **Index**: `name` & **IndexPoint**: `date`, `value`
+* **SpendingSeries**: `series_name` & **SpendingPoint**: `date`, `value`
+* **Document**: `id`, `type`, `date`, `url`, `tags`
+* **FinancialMetric**: `metric_name`, `value`, `date`
 
 ### Relationships
 
-* `(c:Company)-[:PART_OF_INDUSTRY]->(i:Industry)`
-* `(c:Company)-[:OFFERS]->(p:Product)`
-* `(idx:Index)-[:HAS_POINT]->(pt:IndexPoint)`
-* `(ss:SpendingSeries)-[:MEASURED_AT]->(sp:SpendingPoint)`
-* `(c:Company)-[:HAS_METRIC]->(m:FinancialMetric)`
-* `(d:Document)-[:RELATED_TO]->(c:Company)`
+```
+(c:Company)-[:PART_OF_INDUSTRY]->(i:Industry)
+(c:Company)-[:OFFERS]->(p:Product)
+(idx:Index)-[:HAS_POINT]->(pt:IndexPoint)
+(ss:SpendingSeries)-[:MEASURED_AT]->(sp:SpendingPoint)
+(c:Company)-[:HAS_METRIC]->(m:FinancialMetric)
+(d:Document)-[:RELATED_TO]->(c:Company)
+(d:Document)-[:ANCHOR_INDUSTRY]->(i:Industry)
+```
+
+Documents can optionally be anchored to their industry nodes for richer context.
 
 ## Pipeline Components
 
-1. **Ingest**
+This project breaks down into discrete scripts located under `scripts/` that can be run independently or orchestrated together.
 
-   ```bash
-   python scripts/ingest.py
-   ```
-
-   Fetch and store raw data under `/data/raw`.
-
-2. **Transform**
-
-   ```bash
-   python scripts/transform.py
-   ```
-
-   Clean, normalize, and output processed files to `/data/processed`.
-
-3. **Load Neo4j**
-
-   ```bash
-   python scripts/load_neo4j.py
-   ```
-
-   Create nodes, relationships, and attach embeddings in Neo4j.
-
-4. **RAG Service** - Not yet tested
-
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-
-   Serve a FastAPI that merges graph queries with vector search for natural‑language responses.
-
-## Getting Started
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://gitlab.com/<your-namespace>/consumer-discretionary-kg.git
-   cd consumer-discretionary-kg
-   ```
-
-2. Configure environment:
-
-   ```bash
-   cp env.example .env
-   ```
-
-   Set `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, and `OPENAI_API_KEY`.
-
-3. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Run the full pipeline following **Pipeline Components**.
+| Script                        | Description                                                                                          |
+|-------------------------------|------------------------------------------------------------------------------------------------------|
+| `scripts/parsers.py`          | Normalize raw scraped sources (Wikipedia, EDGAR filings) into intermediate JSON for downstream use. |
+| `scripts/fred_loader.py`      | Ingest FRED economic series (PCE, CPI, LEI) into the processed dataset.                             |
+| `scripts/fsbi_loader.py`      | Load Fiserv FSBI consumer-discretionary small-business index values.                                 |
+| `scripts/stock_loader.py`     | Fetch company financial metrics (revenue, market cap, P/E, EBITDA) via Yahoo Finance.               |
+| `scripts/embed_documents.py`  | Compute OpenAI embeddings for documents and entities, attaching vectors as node properties in Neo4j.|
+| `scripts/neo4j_db.py`         | Provide Neo4j connection utilities and helper functions for node/relationship creation.              |
+| `scripts/pipelines.py`        | Define and sequence the ETL stages (ingest → transform → load → embed) as a dependency graph.        |
+| `scripts/run_pipeline.py`     | CLI entrypoint that executes the full ETL → Neo4j load → embedding pipeline in one command.         |
 
 
+
+## Configuration
+
+* Copy `.env.example` to `.env` and set your API keys:
+
+  ```
+  FRED_API_KEY=<your_fred_key>
+  EDGAR_API_KEY=<your_edgar_key>
+  OPENAI_API_KEY=<your_openai_key>
+  ```
+* Adjust Neo4j connection settings in `config.yml`.
+
+---
+
+*Last updated: May 2025*
