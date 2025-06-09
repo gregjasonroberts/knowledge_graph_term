@@ -120,15 +120,15 @@ class DataPipeline:
                     print(f"❌ Wiki fetch/parse failed for {symbol}: {e}")
                     continue
 
-                # 3b. Stock price monthly returns ingestion
+                # 3b. Stock price daily returns ingestion
                 try:
-                    returns = self.stock.fetch_monthly_returns(
+                    returns = self.stock.fetch_daily_returns(
                         symbol,
                         start="2022-01-01"
                     )
                     for date, ret in returns.items():
                         self.db.store_stock_return(symbol, date, ret)
-                    print(f"✅ Loaded monthly returns for {symbol}")
+                    print(f"✅ Loaded daily returns for {symbol}")
                 except Exception as e:
                     print(f"❌ Stock returns ingest failed for {symbol}: {e}")
 

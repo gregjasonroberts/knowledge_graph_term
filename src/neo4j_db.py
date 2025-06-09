@@ -1,14 +1,21 @@
 #neo4j_db.py
 
-from neo4j import GraphDatabase
+# from neo4j import GraphDatabase
+from neo4j import GraphDatabase, basic_auth
+
 import os
 
 class Neo4jHandler:
     def __init__(self, uri=None, user=None, password=None, database="neo4j"):
-        self.uri = uri or os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-        self.user = user or os.environ.get("NEO4J_USER", "neo4j")
-        self.password = password or os.environ.get("NEO4J_PASSWORD", "password")
-        self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+        self.uri = uri or os.environ.get("NEO4J_URI")
+        self.user = user or os.environ.get("NEO4J_USER")
+        self.password = password or os.environ.get("NEO4J_PASSWORD")
+        self.driver = GraphDatabase.driver(
+            self.uri,
+            auth=basic_auth(self.user, self.password)
+        )
+
+
         self.database = database
 
     def close(self):

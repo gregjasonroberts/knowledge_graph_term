@@ -9,16 +9,16 @@ class StockLoader:
     def __init__(self):
         pass
 
-    def fetch_monthly_returns(self, symbol, start="2022-01-01", end=None):
+    def fetch_daily_returns(self, symbol, start="2022-01-01", end=None):
         """
-        Returns a dict of {date_str: monthly_return}.
+        Returns a dict of {date_str: daily_return}.
         """
         ticker = yf.Ticker(symbol)
-        # Get daily close and resample to month-end
+        # Get daily close prices
         hist = ticker.history(start=start, end=end, auto_adjust=True)
-        # month-end prices
-        monthly = hist['Close'].resample('ME').last()
-        # compute simple or log returns
-        returns = monthly.pct_change().dropna()
+        # daily closing prices
+        daily = hist['Close']
+        # compute simple daily returns
+        returns = daily.pct_change().dropna()
         # format as { 'YYYY-MM-DD': float }
         return {date.strftime("%Y-%m-%d"): float(ret) for date, ret in returns.items()}

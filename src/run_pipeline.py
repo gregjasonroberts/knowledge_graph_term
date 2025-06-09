@@ -16,8 +16,13 @@ if __name__ == "__main__":
         project_root = os.path.dirname(repo_dir)
 
         # 4) Now point at the CSVs sitting in WebFocusedCrawlWork/
-        ticker_csv = os.path.join(project_root, "consumer_discretionary_sites.csv")
-        fsbi_csv   = os.path.join(project_root, "fsbi_data_010122_040125.csv")
+        # ticker_csv = os.path.join(project_root, "consumer_discretionary_sites.csv")
+        # fsbi_csv   = os.path.join(project_root, "fsbi_data_010122_040125.csv")
+        
+        #for colab, use absolute paths
+        ticker_csv = "/content/drive/My Drive/Colab Notebooks/MSDS459_Final_Project/consumer_discretionary_sites.csv"
+        fsbi_csv = "/content/drive/My Drive/Colab Notebooks/MSDS459_Final_Project/fsbi_data_010122_040125.csv"
+
 
         pipeline = DataPipeline(
             csv_path=ticker_csv,

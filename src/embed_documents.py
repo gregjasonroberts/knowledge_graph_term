@@ -1,5 +1,6 @@
 # embed_documents.py
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, basic_auth
+
 from sentence_transformers import SentenceTransformer
 import os
 
@@ -15,9 +16,8 @@ PASS = os.environ.get("NEO4J_PASSWORD", "password")
 # Initialize the embedding model
 model = SentenceTransformer("all-mpnet-base-v2")
 
-# Connect to Neo4j
-# Connect to Neo4j without authentication (password disabled)
-driver = GraphDatabase.driver(URI)
+driver = GraphDatabase.driver(URI, auth=basic_auth(USER, PASS))
+
 
 with driver.session() as session:
     # Fetch all documents without embeddings
