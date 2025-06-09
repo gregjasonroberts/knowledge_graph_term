@@ -6,7 +6,7 @@ This repository hosts an extensible, data‑rich knowledge graph for the consume
 
 ## Data Ingestion & Graph Construction
 
-Our knowledge base ingests **four distinct data streams** and unifies them in Neo4j. A custom `DocumentParser` class normalizes scraped and parsed sources into Python dictionaries, and relationships are anchored to company, industry, and macro nodes.
+Our knowledge base ingests **five distinct data streams** and unifies them in Neo4j. A custom `DocumentParser` class normalizes scraped and parsed sources into Python dictionaries, and relationships are anchored to company, industry, and macro nodes.
 
 1. **Textual Documents**: Wikipedia Infoboxes & Articles
 
