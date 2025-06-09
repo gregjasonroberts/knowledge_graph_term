@@ -61,7 +61,7 @@ Our knowledge base ingests **five distinct data streams** and unifies them in Ne
 * **SpendingSeries**: `series_name` & **SpendingPoint**: `date`, `value`
 * **Document**: `id`, `type`, `date`, `url`, `tags`
 * **FinancialMetric**: `metric_name`, `value`, `date`
-* **Sentiment**: date, score, source
+* **Sentiment**: `date`, `score`, `source`
 
 ### Relationships
 
