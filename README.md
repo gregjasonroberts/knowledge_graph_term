@@ -13,7 +13,7 @@ Our knowledge base ingests **four distinct data streams** and unifies them in Ne
    * Scrape each company’s Wikipedia page with BeautifulSoup, extracting infobox fields (e.g., name, CEO, headquarters, industry) and the first valid paragraph of body text.
    * Parse and normalize into `Document` nodes using `DocumentParser`.
 
-2. **Market Indices & Financial Metrics**
+2. **Market Indices & Financial Metrics** (Future work)
 
    * Fetch historical index values (e.g., S\&P 500, Dow Jones Consumer Discretionary) and key financial ratios (revenue, market cap, P/E, EBITDA) via the Yahoo Finance API and official index providers.
    * Store in `Index` nodes with related `IndexPoint` children and link metrics (`FinancialMetric`) to `Company` nodes.
@@ -27,6 +27,11 @@ Our knowledge base ingests **four distinct data streams** and unifies them in Ne
 
    * Retrieve the three most recent annual and quarterly filings per ticker via the SEC EDGAR API.
    * Parse XBRL metadata and HTML sections, storing metadata (`type`, `date`, `url`) and linking each `Document` node to its `Company` and, optionally, `Industry`.
+  
+5. **Business New Sentiment Analysis**
+   * Retrieve news articles with the web automation library `playwright` developed by Microsoft that can control web browsers like Chromium, Firefox, and WebKit.
+   * Articles were scraped with asynch_playwright and the sentiment was determined by financial BerTokenizer model called FinBERT.
+   * The model returned probabilities for negative, neutral and positive and the weighted average for each company was saved to a csv.
 
 ## Data Sources
 
@@ -42,6 +47,7 @@ Our knowledge base ingests **four distinct data streams** and unifies them in Ne
 * **Web Scraping**
 
   * **Wikipedia**: Infobox data and article intros via BeautifulSoup & `DocumentParser`.
+  * **Yahoo Finace News**:  News articles aggregated by Yahoo Finance and scraped with BeautifulSoup for sentiment scoring with FinBERT transformer.
   * **SEC EDGAR**: 10‑K / 8‑K filings parsed through XBRL and HTML parsing.
 
 ## Graph Schema
@@ -55,6 +61,7 @@ Our knowledge base ingests **four distinct data streams** and unifies them in Ne
 * **SpendingSeries**: `series_name` & **SpendingPoint**: `date`, `value`
 * **Document**: `id`, `type`, `date`, `url`, `tags`
 * **FinancialMetric**: `metric_name`, `value`, `date`
+* **Sentiment**: date, score, source
 
 ### Relationships
 
@@ -95,9 +102,10 @@ This project breaks down into discrete scripts located under `scripts/` that can
   FRED_API_KEY=<your_fred_key>
   EDGAR_API_KEY=<your_edgar_key>
   OPENAI_API_KEY=<your_openai_key>
+  NEO4J_URI
   ```
 * Adjust Neo4j connection settings in `config.yml`.
 
 ---
 
-*Last updated: May 2025*
+*Last updated: June 2025*
